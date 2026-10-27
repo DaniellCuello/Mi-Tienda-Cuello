@@ -50,3 +50,4 @@ Durante la implementación guiada por IA, se identificaron y aplicaron las sigui
 
 ## 4. Conclusión
 El uso de la herramienta de IA permitió agilizar el maquetado visual moderno y la estructuración del flujo CRUD offline-first, mientras que las reglas y validaciones estrictas del parcial fueron auditadas y ajustadas línea por línea por el estudiante.
+

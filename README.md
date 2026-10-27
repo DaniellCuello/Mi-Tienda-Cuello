@@ -182,3 +182,4 @@ A continuación se evidencian las 7 pantallas y funcionalidades exigidas en el p
 ├── metro.config.js        # Configuración de Metro para resolver SQL y WASM
 └── drizzle.config.ts      # Configuración de Drizzle Kit
 ```
+
