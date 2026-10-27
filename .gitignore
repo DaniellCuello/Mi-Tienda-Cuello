@@ -1,0 +1,34 @@
+# Node dependencies
+node_modules/
+package-lock.json
+
+# Environment files - STRICTLY IGNORED (Never commit secrets or .env)
+.env
+.env*.local
+.env.production
+.env.development
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# SQLite databases
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Native builds
+android/
+ios/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System
+.DS_Store
+Thumbs.db
+
