@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    // Obtener sesión inicial guardada en SecureStore
+    // Obtener sesión inicial guardada en SecureStore / localStorage
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (mounted) {
         setSession(session);
@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (mounted) setIsLoading(false);
     });
 
-    // Escuchar cambios de autenticación
+    // Escuchar cambios de autenticación en tiempo real
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, currentSession) => {
       if (mounted) {
         setSession(currentSession);
@@ -50,10 +50,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     signIn: async (email: string, password: string) => {
       try {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
         });
+        if (data?.session) {
+          setSession(data.session);
+        }
         return error ? error.message : null;
       } catch (err: any) {
         return err?.message ?? 'Error inesperado al iniciar sesión';
@@ -66,16 +69,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           password,
         });
         if (error) return error.message;
-        if (!data.session) {
-          return 'Usuario registrado con éxito. Si la confirmación de correo está activa en Supabase, confirma tu correo antes de ingresar.';
+        if (data?.session) {
+          setSession(data.session);
+          return null;
         }
-        return null;
+
+        // Si no devolvió sesión directa, intentar login (en caso de confirm email desactivado)
+        const loginRes = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+        if (loginRes.data?.session) {
+          setSession(loginRes.data.session);
+          return null;
+        }
+
+        return 'Usuario registrado. Recuerda desactivar Confirm Email en Authentication -> Providers -> Email en Supabase para ingresar sin confirmar correo.';
       } catch (err: any) {
         return err?.message ?? 'Error inesperado al registrar usuario';
       }
     },
     signOut: async () => {
       await supabase.auth.signOut();
+      setSession(null);
     },
   };
 
@@ -89,4 +105,3 @@ export function useAuth() {
   }
   return ctx;
 }
-

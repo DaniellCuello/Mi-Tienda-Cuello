@@ -21,8 +21,18 @@ export async function syncProducts(userId?: string): Promise<SyncResult> {
   try {
     // Verificar sesión y autenticación
     const { data: authData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !authData.session) {
-      throw new Error('No hay una sesión activa de Supabase para sincronizar');
+    let currentSession = authData?.session;
+
+    if (!currentSession) {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData?.user) {
+        throw new Error('Debes iniciar sesión o registrarte con tu correo en la app antes de sincronizar.');
+      }
+    }
+
+    const currentUserId = currentSession?.user?.id || (await supabase.auth.getUser()).data.user?.id;
+    if (!currentUserId) {
+      throw new Error('No se pudo identificar el usuario autenticado para sincronizar.');
     }
 
     // ==========================================
@@ -77,7 +87,7 @@ export async function syncProducts(userId?: string): Promise<SyncResult> {
       const uploadTimestamp = p.updatedAt;
       const { error: upsertError } = await supabase.from('products').upsert(
         {
-          user_id: authData.session.user.id,
+          user_id: currentUserId,
           client_id: p.clientId,
           name: p.name,
           quantity: p.quantity,

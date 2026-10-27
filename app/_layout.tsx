@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View, Platform } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { AuthProvider, useAuth } from '../context/AuthContext';
@@ -10,6 +10,20 @@ import { Colors } from '../constants/theme';
 
 function ProtectedNavigation() {
   const { user, isLoading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const inAuthGroup = segments[0] === 'login' || segments[0] === 'registro';
+
+    if (!user && !inAuthGroup) {
+      router.replace('/login');
+    } else if (user && inAuthGroup) {
+      router.replace('/');
+    }
+  }, [user, isLoading, segments]);
 
   if (isLoading) {
     return (
@@ -114,4 +128,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
