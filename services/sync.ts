@@ -77,6 +77,7 @@ export async function syncProducts(userId?: string): Promise<SyncResult> {
       const uploadTimestamp = p.updatedAt;
       const { error: upsertError } = await supabase.from('products').upsert(
         {
+          user_id: authData.session.user.id,
           client_id: p.clientId,
           name: p.name,
           quantity: p.quantity,
