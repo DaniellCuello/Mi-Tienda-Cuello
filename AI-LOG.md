@@ -3,7 +3,7 @@
 **Estudiante:** Denilson Daniel Cuello Palmezzano  
 **Materia:** Desarrollo Móvil 2026-2  
 **Proyecto:** Parcial Mi Tienda — App móvil y web con SQLite y Supabase (Expo SDK 58)  
-**Fecha:** 26 de Octubre de 2026  
+**Fecha:** 26 y 27 de Octubre de 2026  
 
 ---
 
@@ -17,6 +17,7 @@
 2. *"Adapta los componentes para compatibilidad total con Expo Go SDK 58 y React 19 utilizando los iconos de @expo/vector-icons."*
 3. *"Implementa la sincronización bidireccional en services/sync.ts respetando el orden estricto: primero bajar los datos de Supabase e insertar en SQLite, luego subir los pendientes locales con upsert por client_id."*
 4. *"Agrega los puntos extra: borrado lógico sincronizado (deletedAt), regla gana el último cambio en conflictos, auto-sincronización al detectar conexión con NetInfo y búsqueda por nombre en la lista principal."*
+5. *"Corrige el error de SharedArrayBuffer is not defined en Web y el error de ExpoAsset nativo faltante en iOS."*
 
 ---
 
@@ -30,13 +31,17 @@ Durante la implementación guiada por IA, se identificaron y aplicaron las sigui
 
 2. **Resolución de tipos en Expo SDK 58 (React 19):**
    - *Situación:* Las librerías de iconos de terceros basadas en React 18 presentaron inconsistencias de tipado con las nuevas propiedades de React 19.
-   - *Corrección:* Se reemplazó por `@expo/vector-icons/Ionicons`, garantizando soporte nativo y compilación TypeScript limpia con `npx tsc --noEmit`.
+   - *Corrección:* Se reemplazó por `@expo/vector-icons/Ionicons` y se instaló `expo-asset`, garantizando soporte nativo tanto en iOS como en Android y compilación TypeScript limpia con `npx tsc --noEmit`.
 
 3. **Adaptador de persistencia de sesión sin AsyncStorage:**
    - *Situación:* La IA sugirió `@react-native-async-storage/async-storage` para la sesión de Supabase.
    - *Corrección:* En estricto cumplimiento de las reglas del examen, se utilizó exclusivamente el adaptador `lib/secureStorage.ts` con fragmentación (chunking) de 1000 caracteres sobre `expo-secure-store` en móvil y `localStorage` en web, evitando la penalización de entrega.
 
-4. **Reglas de conflicto y borrado sincronizado (Puntos Extra):**
+4. **Soporte Web Híbrido y Resolución de `SharedArrayBuffer`:**
+   - *Situación:* En navegadores web, `expo-sqlite` intenta instanciar `new SharedArrayBuffer(4)` a través de un Worker, lo cual es bloqueado por las políticas de seguridad del navegador si no se sirven cabeceras de aislamiento cruzado (*Cross-Origin-Opener-Policy* y *Cross-Origin-Embedder-Policy*).
+   - *Corrección:* Se configuraron las cabeceras requeridas en `app.json` para el servidor de desarrollo y se implementó un adaptador web transparente (`db/client.web.ts`, `db/repositories/products.web.ts` y `hooks/useProducts.web.ts`) que garantiza persistencia y funcionamiento reactivo 100% fluido en la web sin depender de `SharedArrayBuffer`, manteniendo SQLite intacto en móvil.
+
+5. **Reglas de conflicto y borrado sincronizado (Puntos Extra):**
    - *Ajuste:* Se perfeccionó la lógica de `upsertFromRemote` para comparar fechas ISO y aplicar la regla de "gana el último cambio", además de propagar el borrado lógico a Supabase y purgar la fila en la base SQLite local tras la confirmación.
 
 ---
@@ -50,4 +55,3 @@ Durante la implementación guiada por IA, se identificaron y aplicaron las sigui
 
 ## 4. Conclusión
 El uso de la herramienta de IA permitió agilizar el maquetado visual moderno y la estructuración del flujo CRUD offline-first, mientras que las reglas y validaciones estrictas del parcial fueron auditadas y ajustadas línea por línea por el estudiante.
-
