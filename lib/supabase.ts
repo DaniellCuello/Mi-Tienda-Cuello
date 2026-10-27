@@ -2,11 +2,18 @@ import { AppState } from 'react-native';
 import { createClient } from '@supabase/supabase-js';
 import { secureStorage } from './secureStorage';
 
-const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const key = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const url =
+  process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const key =
+  process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 export function checkSupabaseConfig(): boolean {
-  return !!(url && key && url !== 'https://xxxxxxxxxxxxxxxxxxxx.supabase.co');
+  return !!(
+    url &&
+    key &&
+    url !== 'https://xxxxxxxxxxxxxxxxxxxx.supabase.co'
+  );
 }
 
 export const supabase = createClient(
@@ -29,4 +36,3 @@ AppState.addEventListener('change', (state) => {
     supabase.auth.stopAutoRefresh();
   }
 });
-
